@@ -1,0 +1,51 @@
+service: awosome-functions
+
+provider:
+  name: aws
+  region: ap-northeast-1
+  timeout: 120
+  runtime: go1.x
+  stage: ${opt:stage, self:custom.defaultStage}
+  lambdaHashingVersion: 20201221
+
+custom:
+  defaultStage: dev
+  environment:
+    dev:
+      updateLanking:
+        handler: updateLanking/build/develop/main
+        path: updateLanking
+      readLanking:
+        handler: readLanking/build/develop/main
+        path: readLanking
+    prod:
+      updateLanking:
+        handler: updateLanking/build/production/main
+        path: updateLanking
+      readLanking:
+        handler: readLanking/build/production/main
+        path: readLanking
+
+functions:
+  updateLanking:
+    handler: ${self:custom.environment.${opt:stage, self:custom.defaultStage}.updateLanking.handler}
+    description: "Deploy Go Sample Script"
+    timeout: 60
+    events:
+      - http:
+          path: ${self:custom.environment.${opt:stage, self:custom.defaultStage}.updateLanking.path}
+          method: post
+          cors:
+            origin: "*"
+            allowCredentials: true
+  readLanking:
+    handler: ${self:custom.environment.${opt:stage, self:custom.defaultStage}.readLanking.handler}
+    description: "Deploy Go Sample Script"
+    timeout: 60
+    events:
+      - http:
+          path: ${self:custom.environment.${opt:stage, self:custom.defaultStage}.readLanking.path}
+          method: get
+          cors:
+            origin: "*"
+            allowCredentials: true
